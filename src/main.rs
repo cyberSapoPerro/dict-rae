@@ -1,17 +1,17 @@
 use serde_json::Value;
 
-fn rae_api(word: &str) {
+fn rae_api(word: &str) -> Option<Value> {
     let url = format!("https://rae-api.com/api/words/{}", word);
 
     let mut response = match ureq::get(&url).call() {
         Ok(resp) => resp,
         Err(ureq::Error::StatusCode(code)) => {
             eprintln!("HTTP error: {}", code);
-            return;
+            return None;
         },
         Err(e) => {
             eprintln!("Request failed: {}", e);
-            return;
+            return None;
         },
     };
 
@@ -19,11 +19,11 @@ fn rae_api(word: &str) {
         Ok(v) => v,
         Err(e) => {
             eprintln!("JSON error: {}", e);
-            return;
+            return None;
         }
     };
 
-    print_meanings(&json);
+    Some(json)
 }
 
 fn print_meanings(json: &Value){
@@ -83,5 +83,7 @@ fn main() {
             std::process::exit(1);
         });
 
-    rae_api(&word);
+    if let Some(json) = rae_api(&word) {
+        print_meanings(&json);
+    }
 }
