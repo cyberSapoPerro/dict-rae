@@ -77,10 +77,11 @@ fn print_meanings(json: &Value){
 
 }
 
-
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let word: &str = &args[1];
+    let word = std::env::args().nth(1).unwrap_or_else(|| {
+            eprint!("Uso: dict-rae <palabra>");
+            std::process::exit(1);
+        });
 
     rae_api(&word);
 }
