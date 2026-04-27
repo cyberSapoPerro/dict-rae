@@ -2,6 +2,8 @@
 
 Consulta el diccionario de la Real Academia de la Lengua Española desde tu terminal 📚.
 
+![demo](./assets/demo.gif)
+
 ## Uso
 
 Pasa como argumento la palabra que quieres consultar:
