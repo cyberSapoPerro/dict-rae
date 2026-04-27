@@ -19,11 +19,8 @@ Palabra: amar
 ```
 ## Instalación
 
-Clona el repositorio y compila en modo release:
+Usando `Cargo`:
 
 ```bash
-git clone https://github.com/tu-usuario/dict-rae.git
-cd dict-rae
-cargo build --release
-mv target/release/dict-rae ~/.local/bin/
+cargo install --git https://github.com/cyberSapoPerro/dict-rae.git
 ```
