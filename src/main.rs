@@ -1,3 +1,5 @@
+use std::io::IsTerminal;
+
 use serde_json::Value;
 
 fn rae_api(word: &str) -> Option<Value> {
@@ -26,13 +28,17 @@ fn rae_api(word: &str) -> Option<Value> {
     Some(json)
 }
 
-fn print_meanings(json: &Value){
-    println!("\n");
+fn print_meanings(json: &Value, colors: &bool){
     let word = json["data"]["word"]
         .as_str()
         .unwrap_or("<unknown>");
 
-    println!("Palabra: \x1b[34m\x1b[1m{}\x1b[0m\n", word);
+    let styled_word = if *colors {
+        format!("\x1b[34m\x1b[1m{}\x1b[0m", word)
+    } else {
+        word.to_string()
+    };
+    println!("Palabra: {}\n", styled_word);
 
     let meanings = match json["data"]["meanings"].as_array() {
         Some(m) => m,
@@ -51,7 +57,12 @@ fn print_meanings(json: &Value){
             let num = sense["meaning_number"].as_u64().unwrap_or(0);
             let desc = sense["description"].as_str().unwrap_or("");
 
-            println!("\x1b[34m\x1b[1m{}.\x1b[0m {}", num, desc);
+            let styled_num = if *colors {
+                format!("\x1b[34m\x1b[1m{}\x1b[0m", num)
+            } else {
+                num.to_string()
+            };
+            println!("{}. {}", styled_num, desc);
 
             if let Some(syns) = sense["synonyms"].as_array() {
                 let syns_str: Vec<&str> = syns
@@ -59,7 +70,12 @@ fn print_meanings(json: &Value){
                     .filter_map(|s| s.as_str())
                     .collect();
                 if !syns_str.is_empty() {
-                    println!("\x1b[33m{:>8}:\x1b[0m {}", "Sin", syns_str.join(", "));
+                    let styled_sin = if *colors {
+                        format!("\x1b[33m{:>8}:\x1b[0m", "Sin")
+                    } else {
+                        format!("Sin")
+                    };
+                    println!("{} {}", styled_sin, syns_str.join(", "));
                 }
             }
 
@@ -69,7 +85,12 @@ fn print_meanings(json: &Value){
                     .filter_map(|a| a.as_str())
                     .collect();
                 if !ant_str.is_empty() {
-                    println!("\x1b[33m{:>8}:\x1b[0m {}", "Ant", ant_str.join(", "));
+                    let styled_ant = if *colors {
+                        format!("\x1b[33m{:>8}:\x1b[0m", "Ant")
+                    } else {
+                        format!("Ant")
+                    };
+                    println!("{} {}", styled_ant, ant_str.join(", "));
                 }
             }
         }
@@ -83,7 +104,9 @@ fn main() {
             std::process::exit(1);
         });
 
+    let colors: bool = std::io::stdout().is_terminal();
+
     if let Some(json) = rae_api(&word) {
-        print_meanings(&json);
+        print_meanings(&json, &colors);
     }
 }
