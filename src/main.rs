@@ -2,6 +2,8 @@ use std::io::IsTerminal;
 
 use serde_json::Value;
 
+use clap::Parser;
+
 fn rae_api(word: &str) -> Option<Value> {
     let url = format!("https://rae-api.com/api/words/{}", word);
 
@@ -98,15 +100,39 @@ fn print_meanings(json: &Value, colors: &bool){
 
 }
 
+#[derive(Parser)]
+#[command(name = "dict-rae")]
+#[command(version = "1.0")]
+#[command(
+    about = "Consulta el dicionario de la RAE desde tu terminal",
+    long_about = None
+)]
+struct Cli {
+    word: Option<String>,
+
+    #[arg(short, long)]
+    colors: Option<String>,
+}
+
 fn main() {
-    let word = std::env::args().nth(1).unwrap_or_else(|| {
-            eprint!("Uso: dict-rae <palabra>");
-            std::process::exit(1);
-        });
+    let cli = Cli::parse();
 
-    let colors: bool = std::io::stdout().is_terminal();
+    let colors: bool = match cli.colors.as_deref() {
+        Some("always") => true,
+        Some("never") => false,
+        _ => std::io::stdout().is_terminal(),
+    };
 
-    if let Some(json) = rae_api(&word) {
-        print_meanings(&json, &colors);
+    match &cli.word {
+        Some(w) => {
+            if let Some(json) = rae_api(&w) {
+                print_meanings(&json, &colors);
+            }
+        }
+        None => {
+            println!("No se recibió ninguna palabra")
+        }
     }
+
+
 }
