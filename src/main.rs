@@ -50,6 +50,15 @@ fn print_meanings(json: &Value, colors: &bool){
         }
     };
 
+    if let Some(origin) = meanings[0]["origin"]["raw"].as_str() {
+        let styled_origin = if *colors {
+            format!("\x1b[35m\x1b[3m{}\x1b[0m", origin)
+        } else {
+            origin.to_string()
+        };
+        println!("{}\n", styled_origin)
+    }
+
     for meaning in meanings {
         let senses = match meaning["senses"].as_array() {
             Some(s) => s,
