@@ -117,9 +117,11 @@ fn print_meanings(json: &Value, colors: &bool){
     long_about = None
 )]
 struct Cli {
-    word: Option<String>,
+    /// Word to look up
+    word: String,
 
-    #[arg(short, long)]
+    /// Control ANSI color output (default: auto)
+    #[arg(short, long, value_parser = ["always", "never", "auto"])]
     colors: Option<String>,
 }
 
@@ -129,19 +131,11 @@ fn main() {
     let colors: bool = match cli.colors.as_deref() {
         Some("always") => true,
         Some("never") => false,
+        Some("auto") => std::io::stdout().is_terminal(),
         _ => std::io::stdout().is_terminal(),
     };
-
-    match &cli.word {
-        Some(w) => {
-            if let Some(json) = rae_api(&w) {
-                print_meanings(&json, &colors);
-            }
-        }
-        None => {
-            println!("No se recibió ninguna palabra")
-        }
+    
+    if let Some(json) = rae_api(&cli.word) {
+        print_meanings(&json, &colors);
     }
-
-
 }
