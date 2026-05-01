@@ -31,17 +31,6 @@ fn rae_api(word: &str) -> Option<Value> {
 }
 
 fn print_meanings(json: &Value, colors: &bool){
-    let word = json["data"]["word"]
-        .as_str()
-        .unwrap_or("<unknown>");
-
-    let styled_word = if *colors {
-        format!("\x1b[34m\x1b[1m{}\x1b[0m", word)
-    } else {
-        word.to_string()
-    };
-    println!("Palabra: {}\n", styled_word);
-
     let meanings = match json["data"]["meanings"].as_array() {
         Some(m) => m,
         None => {
@@ -62,7 +51,7 @@ fn print_meanings(json: &Value, colors: &bool){
 
         if let Some(origin) = meanings[0]["origin"]["raw"].as_str() {
             let styled_origin = if *colors {
-                format!("\x1b[35m\x1b[3m{}\x1b[0m", origin)
+                format!("\x1b[3;35m{}\x1b[0m", origin)
             } else {
                 origin.to_string()
             };
@@ -78,7 +67,7 @@ fn print_meanings(json: &Value, colors: &bool){
             let desc = sense["description"].as_str().unwrap_or("");
 
             let styled_num = if *colors {
-                format!("\x1b[34m\x1b[1m{}\x1b[0m", num)
+                format!("\x1b[1;34m{}\x1b[0m", num)
             } else {
                 num.to_string()
             };
@@ -91,7 +80,7 @@ fn print_meanings(json: &Value, colors: &bool){
                     .collect();
                 if !syns_str.is_empty() {
                     let styled_sin = if *colors {
-                        format!("\x1b[33m{:>8}:\x1b[0m", "Sin")
+                        format!("{:4}\x1b[33m{}:\x1b[0m", "", "Sin")
                     } else {
                         format!("Sin")
                     };
@@ -106,7 +95,7 @@ fn print_meanings(json: &Value, colors: &bool){
                     .collect();
                 if !ant_str.is_empty() {
                     let styled_ant = if *colors {
-                        format!("\x1b[33m{:>8}:\x1b[0m", "Ant")
+                        format!("{:4}\x1b[33m{}:\x1b[0m", "", "Ant")
                     } else {
                         format!("Ant")
                     };
