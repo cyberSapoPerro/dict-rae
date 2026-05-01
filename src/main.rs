@@ -41,7 +41,6 @@ fn print_meanings(json: &Value, colors: &bool){
 
     let mut i: i32 = 1;
     for meaning in meanings {
-
         let meaning_count = if *colors{
             format!("\x1b[34mSignificado {}\x1b[0m", i)
         } else {
@@ -106,7 +105,18 @@ fn print_meanings(json: &Value, colors: &bool){
         println!("");
         i = i + 1;
     }
+}
 
+fn print_minimal(json: &Value){
+    match json["data"]["meanings"][0]["senses"][0]["raw"].as_str() {
+        Some(s) => {
+            println!("{}", s)
+        }
+        None => {
+            eprint!("No se encontraron significados");
+            return
+        }
+    };
 }
 
 #[derive(Parser)]
@@ -123,6 +133,10 @@ struct Cli {
     /// Control ANSI color output (default: auto)
     #[arg(short, long, value_parser = ["always", "never", "auto"])]
     colors: Option<String>,
+
+    /// Print minimal output
+    #[arg(short, long)]
+    minimal: bool,
 }
 
 fn main() {
@@ -136,6 +150,11 @@ fn main() {
     };
     
     if let Some(json) = rae_api(&cli.word) {
-        print_meanings(&json, &colors);
+        if cli.minimal {
+            print_minimal(&json);
+        }
+        else {
+            print_meanings(&json, &colors);
+        }
     }
 }
