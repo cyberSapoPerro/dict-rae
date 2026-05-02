@@ -7,19 +7,22 @@ use clap::Parser;
 fn rae_api(word: &str) -> Option<Value> {
     let url = format!("https://rae-api.com/api/words/{}", word);
 
-    let mut response = match ureq::get(&url).call() {
-        Ok(resp) => resp,
-        Err(ureq::Error::StatusCode(code)) => {
-            eprintln!("HTTP error: {}", code);
-            return None;
-        },
+    let response = match reqwest::blocking::get(&url) {
+        Ok(resp) => {
+            let status = resp.status();
+            if !status.is_success() {
+                eprint!("HTTP error: {}", status);
+                return None;
+            }
+            resp
+        }
         Err(e) => {
             eprintln!("Request failed: {}", e);
             return None;
-        },
+        }
     };
 
-    let json: Value = match response.body_mut().read_json() {
+    let json: Value = match response.json() {
         Ok(v) => v,
         Err(e) => {
             eprintln!("JSON error: {}", e);
