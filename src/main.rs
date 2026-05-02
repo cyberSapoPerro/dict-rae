@@ -104,6 +104,14 @@ fn print_meanings(json: &Value, colors: &bool){
                     println!("{} {}", styled_ant, ant_str.join(", "));
                 }
             }
+
+            if let Some(examples) = sense["examples"].as_array() 
+                && !examples.is_empty() {
+                println!("\x1b[3;33m{}\x1b[0m", "Examples");
+                for e in examples.iter().filter_map(|e| e.as_str()) {
+                    println!("{:4}{}", "", e);
+                }
+            }
         }
         println!("");
         i = i + 1;
